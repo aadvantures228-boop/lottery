@@ -2,6 +2,7 @@ import random
 from datetime import datetime
 from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.ext import Application, CommandHandler, ContextTypes, CallbackQueryHandler
+import asyncio
 
 BOT_TOKEN = "8914156159:AAGIC1Moru13sSpyV2o23aC4u6xD01PZ5vs"
 ADMIN_IDS = [5646012584, 7433528306]
@@ -177,14 +178,26 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         else:
             await query.edit_message_text("❌ Пользователь не найден.")
 
-def main():
+async def main():
     application = Application.builder().token(BOT_TOKEN).build()
+    
+    # Регистрируем обработчики
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CommandHandler("codes", codes))
     application.add_handler(CommandHandler("check", check))
     application.add_handler(CallbackQueryHandler(button_callback))
+    
     print("Бот запущен!")
-    application.run_polling()
+    
+    await application.initialize()
+    await application.start()
+    await application.updater.start_polling()
+    
+    while True:
+        await asyncio.sleep(3600)
 
 if __name__ == "__main__":
-    main()
+    try:
+        asyncio.run(main())
+    except (KeyboardInterrupt, SystemExit):
+        print("Бот остановлен.")
